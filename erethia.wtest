@@ -1,3 +1,220 @@
 import rolando.*
-describe "Erethia" {
+describe "Prueba del ejercicio 1.1: Rolando y su mochila" {
+  test "Rolando recolecta artefactos hasta llenar la mochila (capacidad 2)" {
+    assert.equals(#{}, rolando.verMochila())
+
+    rolando.encontrarArtefacto(espadaDelDestino)
+    assert.equals(#{espadaDelDestino}, rolando.verMochila())
+
+    rolando.encontrarArtefacto(libroDeHechizo)
+    assert.equals(#{espadaDelDestino, libroDeHechizo}, rolando.verMochila())
+
+    rolando.encontrarArtefacto(collarDivino)
+    assert.equals(#{espadaDelDestino, libroDeHechizo}, rolando.verMochila())
+  }
+
+  test "se puede configurar la capacidad de la mochila" {
+    mochilaDeAlmacenamiento.capacidadDeMochila(3)
+    assert.equals(3, mochilaDeAlmacenamiento.capacidadDeMochila())
+  }
+
+  test "con capacidad ampliada, Rolando puede llevar más de 2 artefactos" {
+    mochilaDeAlmacenamiento.capacidadDeMochila(3)
+
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(libroDeHechizo)
+    rolando.encontrarArtefacto(collarDivino)
+
+    assert.equals(#{espadaDelDestino, libroDeHechizo, collarDivino}, rolando.verMochila())
+  }
+}
+
+describe "Rolando y el castillo de piedra" {
+
+  test "Rolando lleva sus artefactos al castillo y libera espacio en la mochila" {
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(libroDeHechizo)
+    assert.equals(#{espadaDelDestino, libroDeHechizo}, rolando.verMochila())
+
+    rolando.llegoASuHogar()
+    assert.equals(#{}, rolando.verMochila())
+
+    // castilloDePiedra.artefactosGuardados() sigue siendo List, pero su contenido
+    // proviene de un Set (sin orden garantizado). Verificamos tamaño + contenido,
+    // no el orden exacto.
+    assert.equals(2, castilloDePiedra.artefactosGuardados().size())
+    assert.that(castilloDePiedra.artefactosGuardados().contains(espadaDelDestino))
+    assert.that(castilloDePiedra.artefactosGuardados().contains(libroDeHechizo))
+
+    rolando.encontrarArtefacto(collarDivino)
+    assert.equals(#{collarDivino}, rolando.verMochila())
+
+    rolando.llegoASuHogar()
+    assert.equals(#{}, rolando.verMochila())
+
+    assert.equals(3, castilloDePiedra.artefactosGuardados().size())
+    assert.that(castilloDePiedra.artefactosGuardados().contains(espadaDelDestino))
+    assert.that(castilloDePiedra.artefactosGuardados().contains(libroDeHechizo))
+    assert.that(castilloDePiedra.artefactosGuardados().contains(collarDivino))
+  }
+
+}
+
+describe "Posesiones de Rolando" {
+
+  test "conocer todas las posesiones de Rolando (mochila + castillo)" {
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(collarDivino)
+    rolando.llegoASuHogar()
+
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+
+    // posesiones() combina hogar.artefactosGuardados() (List) + mochila.artefactosDentro() (Set).
+    // No hay orden garantizado en el resultado; verificamos tamaño + contenido.
+    assert.equals(3, rolando.posesiones().size())
+    assert.that(rolando.posesiones().contains(espadaDelDestino))
+    assert.that(rolando.posesiones().contains(collarDivino))
+    assert.that(rolando.posesiones().contains(armaduraDeAceroValyrio))
+  }
+
+  test "Rolando posee un artefacto que tiene en el castillo" {
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.llegoASuHogar()
+
+    assert.that(rolando.poseeArtefacto(espadaDelDestino))
+  }
+
+  test "Rolando posee un artefacto que tiene en la mochila" {
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+
+    assert.that(rolando.poseeArtefacto(armaduraDeAceroValyrio))
+  }
+
+  test "Rolando no posee un artefacto que nunca recolectó" {
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.llegoASuHogar()
+
+    assert.notThat(rolando.poseeArtefacto(libroDeHechizo))
+  }
+
+}
+
+describe "Historia de encuentros con artefactos" {
+
+  test "el historial registra todos los encuentros, se recolecten o no, y en orden" {
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(libroDeHechizo)
+    rolando.encontrarArtefacto(collarDivino)
+    rolando.llegoASuHogar()
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+    rolando.encontrarArtefacto(collarDivino)
+
+    // historialEncuentrosArtefactos sigue siendo List: necesita orden y permite duplicados.
+    assert.equals(
+      [espadaDelDestino, libroDeHechizo, collarDivino, armaduraDeAceroValyrio, collarDivino],
+      rolando.historialEncuentrosArtefactos()
+    )
+  }
+
+}
+
+describe "Poder de pelea y batallas de Rolando" {
+
+  test "poder de pelea inicial y su evolución tras sucesivas batallas" {
+    rolando.configurarCapacidadMochila(3)
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+    rolando.encontrarArtefacto(collarDivino)
+
+    assert.equals(19, rolando.poderDePelea())
+
+    rolando.lucharUnaBatalla()
+    assert.equals(18, rolando.poderDePelea())
+
+    rolando.lucharUnaBatalla()
+    assert.equals(21.5, rolando.poderDePelea())
+
+    rolando.lucharUnaBatalla()
+    assert.equals(24, rolando.poderDePelea())
+  }
+
+}
+
+describe "Libro de hechizos" {
+
+  test "el libro aporta el poder de su hechizo actual, en orden, y se agota" {
+    rolando.configurarCapacidadMochila(3)
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+    rolando.encontrarArtefacto(collarDivino)
+    rolando.llegoASuHogar()
+
+    rolando.configurarCapacidadMochila(1)
+    rolando.encontrarArtefacto(libroDeHechizo)
+
+    libroDeHechizo.agregarHechizo(bendicion)
+    libroDeHechizo.agregarHechizo(invisibilidad)
+    libroDeHechizo.agregarHechizo(invocacion)
+
+    assert.equals(9, rolando.poderDePelea())
+
+    rolando.lucharUnaBatalla()
+    assert.equals(12, rolando.poderDePelea())
+
+    rolando.lucharUnaBatalla()
+    assert.equals(14, rolando.poderDePelea())
+
+    rolando.lucharUnaBatalla()
+    assert.equals(8, rolando.poderDePelea())
+  }
+
+}
+
+describe "Enemigos y moradas conquistables" {
+
+  test "Rolando puede vencer a los enemigos con menor poder de batalla que el suyo, y conquistar sus moradas" {
+    rolando.configurarCapacidadMochila(3)
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+    rolando.encontrarArtefacto(collarDivino)
+
+    assert.equals(19, rolando.poderDePelea())
+    assert.equals([archibaldo, astra], rolando.enemigoQuePuedeVencer())
+    assert.equals([palacioDeMarmol, torreDeMarfil], rolando.moradasQuePuedeConquistar())
+  }
+
+}
+
+describe "Rolando poderoso" {
+
+  test "Rolando es poderoso solo si puede vencer a todos los enemigos" {
+    rolando.configurarCapacidadMochila(3)
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+    rolando.encontrarArtefacto(collarDivino)
+
+    assert.notThat(rolando.esPoderoso())
+
+    rolando.poder(10)
+    assert.that(rolando.esPoderoso())
+  }
+
+}
+
+describe "Artefacto fatal" {
+
+  test "Rolando posee un artefacto fatal para Astra pero ninguno para Caterina" {
+    rolando.poder(15)
+    rolando.configurarCapacidadMochila(3)
+    rolando.encontrarArtefacto(espadaDelDestino)
+    rolando.encontrarArtefacto(armaduraDeAceroValyrio)
+    rolando.encontrarArtefacto(collarDivino)
+
+    assert.that(rolando.poseeArtefactoFatalParaEnemigo(astra))
+    assert.equals(espadaDelDestino, rolando.obtenerArtefactoFatalParaEnemigo(astra))
+
+    assert.notThat(rolando.poseeArtefactoFatalParaEnemigo(caterina))
+    assert.throwsException({ rolando.obtenerArtefactoFatalParaEnemigo(caterina) })
+  }
+
 }
