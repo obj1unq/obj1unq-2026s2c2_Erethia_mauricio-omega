@@ -44,7 +44,7 @@ object rolando {
 	method poderArtefactoMasPoderosoEnMorada() = hogar.poderDelArtefactoMasPoderoso(self)
 
 	method moradasQuePuedeConquistar() = self.enemigoQuePuedeVencer().map({enemigo => enemigo.morada()})
-	method enemigoQuePuedeVencer() = enemigos.filter({enemigo => enemigo.poderDeBatalla() < self.poderDePelea()})
+	method enemigoQuePuedeVencer() = enemigos.filter({enemigo => enemigo.puedeSerDerrotadoPor(self)})
 	
 	method esPoderoso() = self.enemigoQuePuedeVencer() == enemigos
 	
@@ -136,9 +136,7 @@ object castilloDePiedra{
 
 //Hechizos
 object bendicion{
-	const poderQueAporta = 4
-	
-	method poder(personaje) = poderQueAporta
+	method poder(personaje) = 4
 }
 
 object invisibilidad{
@@ -158,6 +156,8 @@ object caterina{
 	method poderDeBatalla() = poderDeBatalla
 	
 	method morada() = morada
+	
+	method puedeSerDerrotadoPor(personaje) = poderDeBatalla < personaje.poderDePelea()
 }
 
 object archibaldo {
@@ -167,6 +167,8 @@ object archibaldo {
 	method poderDeBatalla() = poderDeBatalla
 	
 	method morada() = morada
+	
+	method puedeSerDerrotadoPor(personaje) = poderDeBatalla < personaje.poderDePelea()
 }
 
 object astra{
@@ -176,6 +178,8 @@ object astra{
 	method poderDeBatalla() = poderDeBatalla
 	
 	method morada() = morada
+	
+	method puedeSerDerrotadoPor(personaje) = poderDeBatalla < personaje.poderDePelea()
 }
 
 object fortalezaDeAcero{}
